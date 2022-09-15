@@ -51,6 +51,21 @@ type GroupMember struct {
 	AccountType  string `json:"accountType,omitempty"`
 }
 
+type GroupMembersUsers struct {
+	Size         int           `json:"size"`
+	MaxResults   int           `json:"max-results"`
+	StartIndex   int           `json:"start-index"`
+	EndIndex     int           `json:"end-index"`
+	GroupMembers []GroupMember `json:"items"`
+}
+
+type GetGroupMembersResult struct {
+	Name   string            `json:"name"`
+	Self   string            `json:"self"`
+	Expand string            `json:"expand"`
+	Users  GroupMembersUsers `json:"users"`
+}
+
 // GroupMeta JIRA v92
 type GroupMeta struct {
 	Name   string `json:"name,omitempty"`
@@ -125,6 +140,22 @@ func (s *GroupService) GetAll(ctx context.Context) ([]GroupMeta, *Response, erro
 	}
 
 	return meta.Groups, resp, nil
+}
+
+func (s *GroupService) GetGroupMembers(ctx context.Context, name string) ([]GroupMember, *Response, error) {
+	apiEndpoint := fmt.Sprintf("rest/api/2/group?groupname=%s&expand=users", url.QueryEscape(name))
+	req, err := s.client.NewRequest(ctx, http.MethodGet, apiEndpoint, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	group := new(GetGroupMembersResult)
+	resp, err := s.client.Do(req, group)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return group.Users.GroupMembers, resp, nil
 }
 
 // Add adds user to group
