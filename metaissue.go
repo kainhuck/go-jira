@@ -16,23 +16,13 @@ type CreateMetaInfo struct {
 	Projects []*MetaProject `json:"projects,omitempty"`
 }
 
-// ProjectIssueType JIRA v9.2
-type ProjectIssueType struct {
-	Self        string `json:"self,omitempty"`
-	ID          string `json:"id,omitempty"`
-	Description string `json:"description,omitempty"`
-	IconURL     string `json:"iconUrl,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Subtask     bool   `json:"subtask,omitempty"`
-}
-
 // ProjectIssueTypesResult JIRA v9.2
 type ProjectIssueTypesResult struct {
-	MaxResults int                `json:"maxResults,omitempty"`
-	StartAt    int                `json:"startAt,omitempty"`
-	Total      int                `json:"total,omitempty"`
-	IsLast     bool               `json:"isLast,omitempty"`
-	Values     []ProjectIssueType `json:"values,omitempty"`
+	MaxResults int             `json:"maxResults,omitempty"`
+	StartAt    int             `json:"startAt,omitempty"`
+	Total      int             `json:"total,omitempty"`
+	IsLast     bool            `json:"isLast,omitempty"`
+	Values     []MetaIssueType `json:"values,omitempty"`
 }
 
 // ProjectIssueField JIRA v92
@@ -125,7 +115,7 @@ func (s *IssueService) GetCreateMeta(ctx context.Context, options *GetQueryOptio
 }
 
 // GetProjectIssueTypes JIRA v9.2
-func (s *IssueService) GetProjectIssueTypes(ctx context.Context, projectIdOrKey string) ([]ProjectIssueType, *Response, error) {
+func (s *IssueService) GetProjectIssueTypes(ctx context.Context, projectIdOrKey string) ([]MetaIssueType, *Response, error) {
 	apiEndpoint := fmt.Sprintf("rest/api/2/issue/createmeta/%s/issuetypes", projectIdOrKey)
 
 	req, err := s.client.NewRequest(ctx, http.MethodGet, apiEndpoint, nil)

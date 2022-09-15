@@ -46,8 +46,13 @@ func TestGetProjectList(t *testing.T) {
 		log.Fatal(err)
 	}
 
+	fmt.Println(projectList)
+
 	for _, pro := range *projectList {
 		fmt.Println(pro.Name, pro.ID)
+		for _, issue := range pro.IssueTypes {
+			fmt.Println(issue.Name, issue.ID)
+		}
 	}
 }
 
@@ -59,7 +64,7 @@ func TestGetProjectIssueTypes(t *testing.T) {
 
 	fmt.Println(types)
 	for _, m := range types {
-		fmt.Println(m.Name, m.ID)
+		fmt.Println(m.Name, m.Id)
 	}
 }
 
