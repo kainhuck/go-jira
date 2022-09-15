@@ -16,6 +16,55 @@ type CreateMetaInfo struct {
 	Projects []*MetaProject `json:"projects,omitempty"`
 }
 
+// ProjectIssueType JIRA v9.2
+type ProjectIssueType struct {
+	Self        string `json:"self,omitempty"`
+	ID          string `json:"id,omitempty"`
+	Description string `json:"description,omitempty"`
+	IconURL     string `json:"iconUrl,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Subtask     bool   `json:"subtask,omitempty"`
+}
+
+// ProjectIssueTypesResult JIRA v9.2
+type ProjectIssueTypesResult struct {
+	MaxResults int                `json:"maxResults,omitempty"`
+	StartAt    int                `json:"startAt,omitempty"`
+	Total      int                `json:"total,omitempty"`
+	IsLast     bool               `json:"isLast,omitempty"`
+	Values     []ProjectIssueType `json:"values,omitempty"`
+}
+
+// ProjectIssueField JIRA v92
+type ProjectIssueField struct {
+	Required        bool        `json:"required,omitempty"`
+	Schema          FieldSchema `json:"schema,omitempty"`
+	Name            string      `json:"name,omitempty"`
+	FieldID         string      `json:"fieldId,omitempty"`
+	HasDefaultValue bool        `json:"hasDefaultValue,omitempty"`
+	Operations      []string    `json:"operations,omitempty"`
+	AllowedValues   []struct {
+		Self           string `json:"self,omitempty"`
+		ID             string `json:"id,omitempty"`
+		Key            string `json:"key,omitempty"`
+		ProjectTypeKey string `json:"projectTypeKey,omitempty"`
+		Description    string `json:"description,omitempty"`
+		IconURL        string `json:"iconUrl,omitempty"`
+		Name           string `json:"name,omitempty"`
+		Subtask        bool   `json:"subtask,omitempty"`
+		AvatarID       int    `json:"avatarId,omitempty"`
+	} `json:"allowedValues,omitempty"`
+}
+
+// ProjectIssueFieldsResult JIRA v92
+type ProjectIssueFieldsResult struct {
+	MaxResults int                 `json:"maxResults,omitempty"`
+	StartAt    int                 `json:"startAt,omitempty"`
+	Total      int                 `json:"total,omitempty"`
+	IsLast     bool                `json:"isLast,omitempty"`
+	Values     []ProjectIssueField `json:"values,omitempty"`
+}
+
 // EditMetaInfo contains information about fields and their attributed to edit a ticket.
 type EditMetaInfo struct {
 	Fields tcontainer.MarshalMap `json:"fields,omitempty"`
@@ -73,6 +122,43 @@ func (s *IssueService) GetCreateMeta(ctx context.Context, options *GetQueryOptio
 	}
 
 	return meta, resp, nil
+}
+
+// GetProjectIssueTypes JIRA v9.2
+func (s *IssueService) GetProjectIssueTypes(ctx context.Context, projectIdOrKey string) ([]ProjectIssueType, *Response, error) {
+	apiEndpoint := fmt.Sprintf("rest/api/2/issue/createmeta/%s/issuetypes", projectIdOrKey)
+
+	req, err := s.client.NewRequest(ctx, http.MethodGet, apiEndpoint, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	types := new(ProjectIssueTypesResult)
+	resp, err := s.client.Do(req, types)
+
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return types.Values, resp, nil
+}
+
+// GetProjectIssueFields JIRA v9.2
+func (s *IssueService) GetProjectIssueFields(ctx context.Context, projectIdOrKey string, issueTypeID string) ([]ProjectIssueField, *Response, error) {
+	apiEndpoint := fmt.Sprintf("rest/api/2/issue/createmeta/%s/issuetypes/%s", projectIdOrKey, issueTypeID)
+	req, err := s.client.NewRequest(ctx, http.MethodGet, apiEndpoint, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	fields := new(ProjectIssueFieldsResult)
+	resp, err := s.client.Do(req, fields)
+
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return fields.Values, resp, nil
 }
 
 // GetEditMeta makes the api call to get the edit meta information for an issue

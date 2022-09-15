@@ -51,6 +51,24 @@ type GroupMember struct {
 	AccountType  string `json:"accountType,omitempty"`
 }
 
+// GroupMeta JIRA v92
+type GroupMeta struct {
+	Name   string `json:"name,omitempty"`
+	HTML   string `json:"html,omitempty"`
+	Labels []struct {
+		Text  string `json:"text,omitempty"`
+		Title string `json:"title,omitempty"`
+		Type  string `json:"type,omitempty"`
+	} `json:"labels,omitempty"`
+}
+
+// GroupsResult JIRA v9.2
+type GroupsResult struct {
+	Header string      `json:"header,omitempty"`
+	Total  int         `json:"total"`
+	Groups []GroupMeta `json:"groups"`
+}
+
 // GroupSearchOptions specifies the optional parameters for the Get Group methods
 type GroupSearchOptions struct {
 	StartAt              int
@@ -90,6 +108,23 @@ func (s *GroupService) Get(ctx context.Context, name string, options *GroupSearc
 		return nil, resp, err
 	}
 	return group.Members, resp, nil
+}
+
+func (s *GroupService) GetAll(ctx context.Context) ([]GroupMeta, *Response, error) {
+	apiEndpoint := "rest/api/2/groups/picker"
+	req, err := s.client.NewRequest(ctx, http.MethodGet, apiEndpoint, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	meta := new(GroupsResult)
+	resp, err := s.client.Do(req, meta)
+
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return meta.Groups, resp, nil
 }
 
 // Add adds user to group
