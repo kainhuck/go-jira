@@ -122,3 +122,27 @@ func TestExport(t *testing.T) {
 
 	fmt.Println("OK")
 }
+
+// NOTCHANGE
+func TestGetSelf(t *testing.T) {
+	_, rsp, err := client.User.GetSelf(context.Background())
+	if err != nil {
+		if _, ok := err.(net.Error); ok {
+			log.Fatal("无法和jira服务器建立连接")
+		}
+		if rsp != nil {
+			if rsp.StatusCode == http.StatusForbidden {
+				log.Fatalf("jira登录错误，错误码: %v \n"+
+					"JIRA错误提示: 账号or密码错误，已经触发JIRA服务的验证码机制，请从web端登出JIRA，"+
+					"再登入时填入验证码。操作后才可进行JIRA同步配置操作", rsp.StatusCode)
+			}
+		}
+
+		log.Fatal("连接jira服务器出错或用户名密码错误")
+	}
+
+	if rsp.StatusCode != http.StatusOK {
+		log.Fatalf("jira登录错误，错误码: %v", rsp.StatusCode)
+	}
+	log.Println("SUCCESS")
+}
