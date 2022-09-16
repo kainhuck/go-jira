@@ -25,25 +25,27 @@ type ProjectIssueTypesResult struct {
 	Values     []MetaIssueType `json:"values,omitempty"`
 }
 
+type AllowedValue struct {
+	Self           string `json:"self,omitempty"`
+	ID             string `json:"id,omitempty"`
+	Key            string `json:"key,omitempty"`
+	ProjectTypeKey string `json:"projectTypeKey,omitempty"`
+	Description    string `json:"description,omitempty"`
+	IconURL        string `json:"iconUrl,omitempty"`
+	Name           string `json:"name,omitempty"`
+	Subtask        bool   `json:"subtask,omitempty"`
+	AvatarID       int    `json:"avatarId,omitempty"`
+}
+
 // ProjectIssueField JIRA v92
 type ProjectIssueField struct {
-	Required        bool        `json:"required,omitempty"`
-	Schema          FieldSchema `json:"schema,omitempty"`
-	Name            string      `json:"name,omitempty"`
-	FieldID         string      `json:"fieldId,omitempty"`
-	HasDefaultValue bool        `json:"hasDefaultValue,omitempty"`
-	Operations      []string    `json:"operations,omitempty"`
-	AllowedValues   []struct {
-		Self           string `json:"self,omitempty"`
-		ID             string `json:"id,omitempty"`
-		Key            string `json:"key,omitempty"`
-		ProjectTypeKey string `json:"projectTypeKey,omitempty"`
-		Description    string `json:"description,omitempty"`
-		IconURL        string `json:"iconUrl,omitempty"`
-		Name           string `json:"name,omitempty"`
-		Subtask        bool   `json:"subtask,omitempty"`
-		AvatarID       int    `json:"avatarId,omitempty"`
-	} `json:"allowedValues,omitempty"`
+	Required        bool           `json:"required,omitempty"`
+	Schema          FieldSchema    `json:"schema,omitempty"`
+	Name            string         `json:"name,omitempty"`
+	FieldID         string         `json:"fieldId,omitempty"`
+	HasDefaultValue bool           `json:"hasDefaultValue,omitempty"`
+	Operations      []string       `json:"operations,omitempty"`
+	AllowedValues   []AllowedValue `json:"allowedValues,omitempty"`
 }
 
 // ProjectIssueFieldsResult JIRA v92
