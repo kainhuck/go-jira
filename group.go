@@ -66,6 +66,16 @@ type GetGroupMembersResult struct {
 	Users  GroupMembersUsers `json:"users"`
 }
 
+type GetGroupMembersResultV9 struct {
+	Self       string        `json:"self"`
+	NextPage   string        `json:"nextPage"`
+	MaxResults int           `json:"maxResults"`
+	StartAt    int           `json:"startAt"`
+	Total      int           `json:"total"`
+	IsLast     bool          `json:"isLast"`
+	Users      []GroupMember `json:"values"`
+}
+
 // GroupMeta JIRA v92
 type GroupMeta struct {
 	Name   string `json:"name,omitempty"`
@@ -142,7 +152,43 @@ func (s *GroupService) GetAll(ctx context.Context) ([]GroupMeta, *Response, erro
 	return meta.Groups, resp, nil
 }
 
+func (s *GroupService) GetGroupMembersV9(ctx context.Context, name string) ([]GroupMember, *Response, error) {
+	var (
+		index = 0
+		all   = make([]GroupMember, 0)
+		req   *http.Request
+		resp  *Response
+		err   error
+	)
+
+	for {
+		apiEndpoint := fmt.Sprintf("/rest/api/2/group/member?groupname=%s&startAt=%d", name, index)
+		req, err = s.client.NewRequest(ctx, http.MethodGet, apiEndpoint, nil)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		group := new(GetGroupMembersResultV9)
+		resp, err = s.client.Do(req, group)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		all = append(all, group.Users...)
+		if group.IsLast {
+			break
+		}
+		index += 50
+	}
+
+	return all, resp, nil
+}
+
 func (s *GroupService) GetGroupMembers(ctx context.Context, name string) ([]GroupMember, *Response, error) {
+	users, resp, err := s.GetGroupMembersV9(ctx, name)
+	if err == nil {
+		return users, resp, nil
+	}
 	apiEndpoint := fmt.Sprintf("rest/api/2/group?groupname=%s&expand=users", url.QueryEscape(name))
 	req, err := s.client.NewRequest(ctx, http.MethodGet, apiEndpoint, nil)
 	if err != nil {
@@ -150,7 +196,7 @@ func (s *GroupService) GetGroupMembers(ctx context.Context, name string) ([]Grou
 	}
 
 	group := new(GetGroupMembersResult)
-	resp, err := s.client.Do(req, group)
+	resp, err = s.client.Do(req, group)
 	if err != nil {
 		return nil, resp, err
 	}
