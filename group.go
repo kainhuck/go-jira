@@ -136,7 +136,7 @@ func (s *GroupService) Get(ctx context.Context, name string, options *GroupSearc
 }
 
 func (s *GroupService) GetAll(ctx context.Context) ([]GroupMeta, *Response, error) {
-	apiEndpoint := "rest/api/2/groups/picker"
+	apiEndpoint := "rest/api/2/groups/picker?maxResults=1000000"
 	req, err := s.client.NewRequest(ctx, http.MethodGet, apiEndpoint, nil)
 	if err != nil {
 		return nil, nil, err
